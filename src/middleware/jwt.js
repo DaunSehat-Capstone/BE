@@ -17,7 +17,13 @@ function verifyToken(token) {
     } catch (error) {
         return { error: true, message: error.message };
     }
-
 }
 
-module.exports = { generateToken, verifyToken };
+function getTokenInfo(token) {
+    if (token.startsWith('Bearer ')) {
+        token = token.split(' ')[1];
+    }
+    return jwt.decode(token);
+}
+
+module.exports = { generateToken, verifyToken, getTokenInfo };

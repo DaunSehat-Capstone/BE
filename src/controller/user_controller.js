@@ -1,6 +1,6 @@
 const db = require('../database');
 const bcrypt = require('bcrypt');
-const { generateToken } = require('../middleware/jwt');
+const { generateToken, getTokenInfo } = require('../middleware/jwt');
 
 function register_user(req, res) {
   const { email, hashed_password, name } = req.body;
@@ -45,14 +45,14 @@ async function login_user(req, res){
     }
 
     if (result.length === 0) {
-      return res.status(400).json({ error: 'Invalid email or password.' });
+      return res.status(400).json({ error: 'Email not found.' });
     }
 
     const user = result[0];
 
     const isPasswordMatch = await bcrypt.compare(password, user.hashed_password);
     if (!isPasswordMatch) {
-      return res.status(400).json({ error: 'Invalid email or password.' });
+      return res.status(400).json({ error: 'Invalid password.' });
     }
 
     const token = generateToken(user);
@@ -64,4 +64,13 @@ async function login_user(req, res){
   });   
 }
 
-module.exports = { register_user, login_user };
+function get_user_profile(req, res) {
+  const JWT_TOKEN = req.headers.authorization;
+  const decoded = getTokenInfo(JWT_TOKEN);
+  res.status(200).json({ 
+    message: 'Success getting user profile information.',
+    user: { user_id: decoded.id, email: decoded.email, name: decoded.name },
+   });
+}
+
+module.exports = { register_user, login_user, get_user_profile };
