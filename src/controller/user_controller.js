@@ -11,10 +11,9 @@ function register_user(req, res) {
 
   const h_password = bcrypt.hashSync(hashed_password, 10);
 
-  const user_id = Math.floor(Math.random() * 1000);
 
-  const sql = `INSERT INTO users (user_id, email, hashed_password, name) VALUES (?, ?, ?, ?)`;
-  const values = [user_id, email, h_password, name];
+  const sql = `INSERT INTO users (email, hashed_password, name) VALUES (?, ?, ?)`;
+  const values = [email, h_password, name];
 
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -27,7 +26,7 @@ function register_user(req, res) {
 
     res.status(201).json({
       message: 'User registered successfully.',
-      user: { user_id, email, name },
+      user: { email, name },
     });
   });
 }
@@ -73,4 +72,40 @@ function get_user_profile(req, res) {
    });
 }
 
-module.exports = { register_user, login_user, get_user_profile };
+async function put_user_profile(req, res) {
+  const { email, name } = req.body;
+  const JWT_TOKEN = req.headers.authorization;
+  const decoded = getTokenInfo(JWT_TOKEN);
+
+  const sql = `UPDATE users SET email = ?, name = ? WHERE user_id = ?`;
+  const values = [email, name, decoded.id];
+
+  if (!email || !name) {
+    return res.status(400).json({ error: 'Email and name are required.' });
+  }
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'An error occurred while updating the user profile.' });
+    }
+  
+
+  const sql_select = `SELECT * FROM users WHERE user_id = ?`;
+
+  db.query(sql_select, [decoded.id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'An error occurred while getting the user profile.' });
+    }
+    const user = result[0];
+    const token = generateToken(
+      { user_id: user.user_id, email: user.email, name: user.name }
+    );
+    res.status(200).json({ message: 'User profile updated successfully.', token, user: { user_id: user.user_id, email: user.email, name: user.name }
+    });
+  });
+});
+}
+
+module.exports = { register_user, login_user, get_user_profile, put_user_profile };
