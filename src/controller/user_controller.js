@@ -101,9 +101,9 @@ async function put_user_profile(req, res) {
       }
       const user = result[0];
       const token = generateToken(
-        { user_id: user.user_id, email: user.email, name: user.name }
+        { user_id: user.user_id, email: user.email, name: user.name, image_url: user.image_url }
       );
-      res.status(200).json({ message: 'User profile updated successfully.', token, user: { user_id: user.user_id, email: user.email, name: user.name }
+      res.status(200).json({ message: 'User profile updated successfully.', token, user: { user_id: user.user_id, email: user.email, name: user.name, image_url: user.image_url }
       });
     });
   });
@@ -139,7 +139,21 @@ async function post_user_img(req, res) {
         console.error(err);
         return res.status(500).json({ error: 'An error occurred while updating the user profile.' });
       }
-      res.status(200).json({ message: 'User profile updated successfully.', image_url: img_url });
+      const sql_select = `SELECT * FROM users WHERE user_id = ?`;
+
+    db.query(sql_select, [decoded.id], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'An error occurred while getting the user profile.' });
+      }
+      const user = result[0];
+      const token = generateToken(
+        { user_id: user.user_id, email: user.email, name: user.name, image_url: user.image_url }
+      );
+      res.status(200).json({ message: 'User profile updated successfully.', token, user: { user_id: user.user_id, email: user.email, name: user.name, image_url: user.image_url }
+      });
+    });
+      // res.status(200).json({ message: 'User profile updated successfully.', image_url: img_url });
     })
   } catch (error){
     res.status(500).send(error);
