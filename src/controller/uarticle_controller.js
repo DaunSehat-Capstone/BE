@@ -1,5 +1,53 @@
 const db = require('../database');
 const { getTokenInfo } = require('../middleware/jwt');
+const { upload_to_gcs } = require("../models/upload_img")
+
+
+async function post_article(req, res) {
+    try {
+        if (req.file){
+            if (req.file.mimetype !== 'image/jpeg' && req.file.mimetype !== 'image/png'){
+                return res.status(400).json({ error: 'File must be an image.' });
+            }
+
+            if (req.file.size > 5 * 1024 * 1024){
+                return res.status(400).json({ error: 'Ukuran file tidak boleh lebih dari 5 MB.' });
+            }
+
+            if (req.file.length > 1){
+                return res.status(400).json({ error: 'Hanya bisa mengunggah 1 gambar.' });
+            }
+
+            const img_url = await upload_to_gcs(req.file, 'article');
+            const JWT_TOKEN = req.headers.authorization;
+            const decoded = getTokenInfo(JWT_TOKEN);
+
+            const query = "INSERT INTO user_article (user_id, title_article, body_article, image_article) VALUES (?, ?, ?, ?)";
+            const values = [decoded.id, req.body.title_article, req.body.body_article, img_url];
+
+            db.query(query, values, (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: 'An error occurred while posting article.' });
+                }
+
+                const sql_select = `SELECT * FROM user_article WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1`;
+
+                db.query(sql_select, [decoded.id], (err, result) => {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({ error: 'An error occurred while getting the user profile.' });
+                    }
+
+                    const article = result[0];
+                    res.status(200).json({ message: 'Article posted successfully.', article });
+                });
+            });
+        }
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
 
 function get_all_article_by_uid(req, res) {
     const decoded = getTokenInfo(req.headers.authorization);
@@ -67,4 +115,4 @@ function get_all_article(req, res) {
     });
 }
 
-module.exports = { get_all_article_by_uid, get_article_by_uaid, delete_article_by_uaid, get_all_article };
+module.exports = { post_article, get_all_article_by_uid, get_article_by_uaid, delete_article_by_uaid, get_all_article };
