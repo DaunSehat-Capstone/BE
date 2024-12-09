@@ -13,6 +13,7 @@ uarticle_route.post('/', authentication, multer.single('file'), uarticle_control
 uarticle_route.get('/', authentication, uarticle_controller.get_all_article);
 uarticle_route.get('/user', authentication, uarticle_controller.get_all_article_by_uid);
 uarticle_route.get('/:article_id', authentication, uarticle_controller.get_article_by_uaid);
+uarticle_route.get('/search/:query', authentication, uarticle_controller.search_user_article);
 uarticle_route.delete('/:article_id', authentication, uarticle_controller.delete_article_by_uaid);
 
 module.exports = uarticle_route;
