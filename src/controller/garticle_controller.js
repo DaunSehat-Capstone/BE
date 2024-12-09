@@ -10,7 +10,7 @@ async function post_article(req, res) {
     const email = decoded.email;
 
     try {
-        if (email !== 'admin@daunsehat.id' && user_id !== 1){
+        if (email !== 'admin@daunsehat.id' && user_id !== 0){
             return res.status(401).json({ error: 'Unauthorized access.' });
         }
         if (req.file){
@@ -62,7 +62,7 @@ function delete_article_by_gid(req, res) {
     const user_id = decoded.id;
     const email = decoded.email;
 
-    if (email !== 'admin@daunsehat.id' && user_id !== 1){
+    if (email !== 'admin@daunsehat.id' && user_id !== 0){
         return res.status(401).json({ error: 'Unauthorized access.' });
     }
 
