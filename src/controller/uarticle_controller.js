@@ -52,7 +52,7 @@ async function post_article(req, res) {
 
 function get_all_article_by_uid(req, res) {
     const decoded = getTokenInfo(req.headers.authorization);
-    const sql = `SELECT u.name, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id WHERE ua.user_id = ? ORDER BY timestamp DESC`;
+    const sql = `SELECT u.name, u.image_url, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id WHERE ua.user_id = ? ORDER BY timestamp DESC`;
     values = [decoded.id];
     db.query(sql, values, (err, result) => {
         if (err) {
@@ -67,7 +67,7 @@ function get_all_article_by_uid(req, res) {
 function get_article_by_uaid(req, res) {
     const { article_id } = req.params;
     // const decoded = getTokenInfo(req.headers.authorization);
-    const sql = `SELECT u.name, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id WHERE article_id = ?`;
+    const sql = `SELECT u.name, u.image_url, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id WHERE article_id = ?`;
     const values = [article_id];
 
     db.query(sql, values, (err, result) => {
@@ -105,7 +105,7 @@ function delete_article_by_uaid(req, res) {
 }
 
 function get_all_article(req, res) {
-    const sql = `SELECT u.name, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id ORDER BY timestamp DESC`;
+    const sql = `SELECT u.name, u.image_url, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id ORDER BY timestamp DESC`;
     db.query(sql, (err, result) => {
         if (err) {
             console.error(err);
@@ -118,7 +118,7 @@ function get_all_article(req, res) {
 
 function search_user_article(req, res) {
     const { query } = req.params;
-    const sql = `SELECT u.name, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id WHERE ua.title_article LIKE ? ORDER BY timestamp DESC`;
+    const sql = `SELECT u.name, u.image_url, ua.article_id, ua.user_id, ua.title_article, ua.body_article, ua.image_article, ua.timestamp FROM user_article ua LEFT JOIN users u ON ua.user_id = u.user_id WHERE ua.title_article LIKE ? ORDER BY timestamp DESC`;
     const values = [`%${query}%`];
 
     db.query(sql, values, (err, result) => {
