@@ -22,6 +22,10 @@ async function post_prediction(req, res){
 
             img_url = await upload_to_gcs(req.file, 'history');
         }
+
+        if(!req.file){
+            return res.status(400).json({ error: 'File must be an image.' });
+        }
         const predict_url = process.env.PREDICT_URL;
 
         const formData = new FormData();
@@ -37,6 +41,11 @@ async function post_prediction(req, res){
         });
 
         const prediction = predict_res.data;
+
+        if (prediction.message === 'Tidak ditemukan hasil'){
+            return res.status(404).json({ error: 'Prediction not found.' });
+        }
+
         const JWT_TOKEN = req.headers.authorization;
         const decoded = getTokenInfo(JWT_TOKEN);
 
