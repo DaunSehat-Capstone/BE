@@ -5,7 +5,6 @@ const FormData = require('form-data');
 const { getTokenInfo } = require("../middleware/jwt")
 
 async function post_prediction(req, res){
-    console.log("req", req)
     let img_url = null;
     try{
         if (req.file){
