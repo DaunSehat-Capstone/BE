@@ -46,7 +46,7 @@ async function login_user(req, res){
     }
 
     if (result.length === 0) {
-      return res.status(400).json({ error: 'Email not found.' });
+      return res.status(401).json({ error: 'Email not found.' });
     }
 
     const user = result[0];
